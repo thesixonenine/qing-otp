@@ -17,8 +17,6 @@ jobs:
         node-version: "20.17.0"
         cache: "pnpm"
     - uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: ""
 
     - name: install frontend dependencies
       run: pnpm install
@@ -34,4 +32,27 @@ jobs:
         name: build-${{ matrix.platform }}
         path: |
           src-tauri/target/release/bundle
-          src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "10.1.0"
+      - uses: actions/setup-node@v4
+        with:
+        node-version: "20.17.0"
+        cache: "pnpm"
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: install frontend dependencies
+        run: pnpm install
+
+      - name: Build Android APK
+        run: pnpm tauri android build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "qing-otp"
+          path: src-tauri/gen/android/app/build/outputs/apk/release/*.apk
