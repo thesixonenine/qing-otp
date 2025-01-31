@@ -4,22 +4,26 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/tauri-apps/tauri-action:latest
     strategy:
       matrix:
         platform: [win, android]
     
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "20.17.0"
     - name: Install
       run: |
         npm i -g pnpm
         pnpm install
-    - name: Set up Rust targets
+    - name: install Rust stable
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: install dependencies
       run: |
-        rustup target add x86_64-pc-windows-gnu
-        rustup target add aarch64-linux-android
+        sudo apt-get update
+        sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
     - name: Set up Android SDK
       if: matrix.platform == 'android'
@@ -35,14 +39,11 @@ jobs:
         echo "export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
 
     - name: Build Tauri app
-      run: |
-        if [ "${{ matrix.platform }}" == "android" ]; then
-          pnpm tauri android build --target aarch64-linux-android
-        else
-          pnpm tauri build --target ${{ matrix.platform }}
-        fi
-      env:
-        TARGET: ${{ matrix.platform }}
+      uses: tauri-apps/tauri-action@v0
+      with:
+        target: ${{ matrix.platform }}
+        args:
+          build --target ${{ matrix.platform == 'android' ? 'aarch64-linux-android': matrix.platform }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
