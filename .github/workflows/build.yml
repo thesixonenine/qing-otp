@@ -5,7 +5,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [windows-latest]
+        platform: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     steps:
     - uses: actions/checkout@v4
@@ -23,7 +23,17 @@ jobs:
     - name: install frontend dependencies
       run: pnpm install
 
+    - uses: actions/setup-java@v4
+      if: matrix.platform == 'ubuntu-latest'
+      with:
+          distribution: "temurin"
+          java-version: "17"
+    - name: Build Tauri Android APK
+      if: matrix.platform == 'ubuntu-latest'
+      run: pnpm tauri android build
+
     - uses: tauri-apps/tauri-action@v0
+      if: matrix.platform != 'ubuntu-latest'
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       with:
