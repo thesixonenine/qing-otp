@@ -1,0 +1,45 @@
+name: Build
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [linux, win, macos, android]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.17.0
+    
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev
+        
+    - name: Install pnpm
+      run: npm i -g pnpm
+    
+    - name: Install
+      run: pnpm install
+    
+    - name: Build
+      run: pnpm tauri build --target ${{ matrix.platform }}
+      env:
+        TARGET: ${{ matrix.platform }}
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-${{ matrix.platform }}
+        path: src-tauri/target/release/bundle
