@@ -28,19 +28,9 @@ jobs:
       with:
           distribution: "temurin"
           java-version: "17"
-    - name: Set up Android SDK
+    - name: Build Tauri Android APK
       if: matrix.platform == 'ubuntu-latest'
-      uses: android-actions/setup-android@v3
-
-    - name: Set up Android NDK
-      if: matrix.platform == 'ubuntu-latest'
-      run: |
-        sudo apt-get install -y --no-install-recommends unzip
-        wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
-        unzip android-ndk-r25b-linux.zip -d /usr/local/lib
-        echo "export ANDROID_NDK_HOME=/usr/local/lib/android-ndk-r25b" >> $GITHUB_ENV
-        echo "export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
-        pnpm tauri android build
+      run: pnpm tauri android build
 
     - uses: tauri-apps/tauri-action@v0
       if: matrix.platform != 'ubuntu-latest'
