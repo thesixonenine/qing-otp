@@ -42,14 +42,11 @@ jobs:
       if: matrix.platform == 'android'
       uses: tauri-apps/tauri-action@v0
       with:
-        target: ${{ matrix.platform }}
-        args: '--target aarch64-linux-android'
+        args: 'aarch64-linux-android'
 
     - name: Build Tauri win app
       if: matrix.platform == 'win'
       uses: tauri-apps/tauri-action@v0
-      with:
-        target: ${{ matrix.platform }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
