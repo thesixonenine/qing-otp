@@ -3,10 +3,9 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [win]
+        platform: [windows-latest]
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v4
@@ -17,19 +16,14 @@ jobs:
         node-version: "20.17.0"
         cache: "pnpm"
     - uses: dtolnay/rust-toolchain@stable
-
-    - name: install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
-        pnpm install
-
-    - name: Build Tauri win app
-      uses: tauri-apps/tauri-action@v0
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
       with:
-        name: build-${{ matrix.platform }}
-        path: |
-          src-tauri/target/release/bundle
+        targets: ""
+
+    - name: install frontend dependencies
+      run: pnpm install
+
+    - uses: tauri-apps/tauri-action@v0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: ""
