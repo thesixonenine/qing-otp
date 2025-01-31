@@ -45,7 +45,8 @@ jobs:
           node-version: "20.17.0"
           cache: "pnpm"
       - uses: dtolnay/rust-toolchain@stable
-        targets: "stable-x86_64-pc-windows-msvc,aarch64-linux-android"
+        with:
+          targets: "stable-x86_64-pc-windows-msvc,aarch64-linux-android"
 
       - run: pnpm install
       - uses: actions/setup-java@v4
