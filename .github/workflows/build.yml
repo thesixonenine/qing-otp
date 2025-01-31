@@ -57,10 +57,14 @@ jobs:
         with:
           ndk-version: r25b
           local-cache: true
-      - run: pnpm tauri android build
+
+      - uses: tauri-apps/tauri-action@v0
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          releaseId: "qing-otp"
+          args: "--target aarch64-linux-android"
       - uses: actions/upload-artifact@v4
         with:
           name: "qing-otp"
