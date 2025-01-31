@@ -45,6 +45,7 @@ jobs:
           node-version: "20.17.0"
           cache: "pnpm"
       - uses: dtolnay/rust-toolchain@stable
+        run: rustup target add aarch64-linux-android
 
       - run: pnpm install
       - uses: actions/setup-java@v4
