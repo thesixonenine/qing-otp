@@ -34,3 +34,4 @@ jobs:
         name: build-${{ matrix.platform }}
         path: |
           src-tauri/target/release/bundle
+          src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
