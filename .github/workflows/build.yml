@@ -4,42 +4,50 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/tauri-apps/tauri-action:latest
     strategy:
       matrix:
-        platform: [linux, win, macos, android]
+        platform: [win, android]
     
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Setup Node
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20.17.0
-    
-    - name: Setup Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: stable
-    
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libwebkit2gtk-4.0-dev libssl-dev
-        
-    - name: Install pnpm
-      run: npm i -g pnpm
-    
     - name: Install
-      run: pnpm install
-    
-    - name: Build
-      run: pnpm tauri build --target ${{ matrix.platform }}
+      run: |
+        npm i -g pnpm
+        pnpm install
+    - name: Set up Rust targets
+      run: |
+        rustup target add x86_64-pc-windows-gnu
+        rustup target add aarch64-linux-android
+
+    - name: Set up Android SDK
+      if: matrix.platform == 'android'
+      uses: android-actions/setup-android@v3
+
+    - name: Set up Android NDK
+      if: matrix.platform == 'android'
+      run: |
+        sudo apt-get install -y --no-install-recommends unzip
+        wget https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+        unzip android-ndk-r25b-linux.zip -d /usr/local/lib
+        echo "export ANDROID_NDK_HOME=/usr/local/lib/android-ndk-r25b" >> $GITHUB_ENV
+        echo "export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH" >> $GITHUB_ENV
+
+    - name: Build Tauri app
+      run: |
+        if [ "${{ matrix.platform }}" == "android" ]; then
+          pnpm tauri android build --target aarch64-linux-android
+        else
+          pnpm tauri build --target ${{ matrix.platform }}
+        fi
       env:
         TARGET: ${{ matrix.platform }}
-    
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
       with:
         name: build-${{ matrix.platform }}
-        path: src-tauri/target/release/bundle
+        path: |
+          src-tauri/target/release/bundle
+          src-tauri/target/aarch64-linux-android/release/*.apk
