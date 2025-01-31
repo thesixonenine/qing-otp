@@ -43,7 +43,7 @@ jobs:
       with:
         target: ${{ matrix.platform }}
         args:
-          build --target ${{ matrix.platform == 'android' ? 'aarch64-linux-android': matrix.platform }}
+          build --target ${{ matrix.platform == 'android' ? 'aarch64-linux-android' : '' }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
