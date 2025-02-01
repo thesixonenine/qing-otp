@@ -61,6 +61,7 @@ jobs:
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
+          rustup target add aarch64-linux-android
           pnpm install
           pnpm tauri android build --target aarch64
           ls -l ./src-tauri/gen/android/app/build/outputs
