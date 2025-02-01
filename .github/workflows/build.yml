@@ -1,39 +1,12 @@
-name: Build
+name: Build APP
 on: [push]
 
 jobs:
-  windows:
+  build:
+    runs-on: windows-latest
     strategy:
       matrix:
-        platform: [windows-latest]
-    runs-on: ${{ matrix.platform }}
-    steps:
-    - uses: actions/checkout@v4
-    - uses: pnpm/action-setup@v4
-      with:
-        version: "10.1.0"
-    - uses: actions/setup-node@v4
-      with:
-        node-version: "20.17.0"
-        cache: "pnpm"
-    - uses: dtolnay/rust-toolchain@stable
-    - name: install frontend dependencies
-      run: pnpm install
-
-    - uses: tauri-apps/tauri-action@v0
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-      with:
-        releaseId: "qing-otp"
-        args: ""
-    - uses: actions/upload-artifact@v4
-      with:
-        name: build-${{ matrix.platform }}
-        path: |
-          src-tauri/target/release/bundle
-
-  android:
-    runs-on: windows-latest
+        platform: [windows, android]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -44,29 +17,49 @@ jobs:
           node-version: "20.17.0"
           cache: "pnpm"
       - uses: dtolnay/rust-toolchain@stable
+
+      # Build android apk
       - uses: actions/setup-java@v4
+        if: matrix.platform == 'android'
         with:
           distribution: "temurin"
           java-version: "17"
       - uses: android-actions/setup-android@v3
+        if: matrix.platform == 'android'
       - uses: nttld/setup-ndk@v1
+        if: matrix.platform == 'android'
         id: setup-ndk
         with:
           ndk-version: r27c
           local-cache: true
-
       - name: Build
+        if: matrix.platform == 'android'
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
         run: |
           rustup target add aarch64-linux-android
           pnpm install
           pnpm tauri android build --target aarch64
-          ls -l ./src-tauri/gen/android/app/build/outputs
-
       - uses: actions/upload-artifact@v4
+        if: matrix.platform == 'android'
         with:
-          name: "qing-otp"
+          name: "qing-otp-android"
           path: |
             src-tauri/gen/android/app/build/outputs/apk/universal/release/*.apk
             src-tauri/gen/android/app/build/outputs/bundle/universalRelease/*.aab
+
+      # Build windows apk
+      - run: pnpm install
+        if: matrix.platform == 'windows'
+      - uses: tauri-apps/tauri-action@v0
+        if: matrix.platform == 'windows'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          releaseId: "qing-otp-windows"
+          args: ""
+      - uses: actions/upload-artifact@v4
+        if: matrix.platform == 'windows'
+        with:
+          name: build-${{ matrix.platform }}
+          path: src-tauri/target/release/bundle
