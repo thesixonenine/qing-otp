@@ -48,7 +48,9 @@ jobs:
         with:
           targets: "x86_64-pc-windows-gnu,aarch64-linux-android,aarch64-linux-android-clang"
 
-      - run: pnpm install
+      - run: |
+          pnpm install
+          rustup target add aarch64-linux-android
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -60,13 +62,9 @@ jobs:
           ndk-version: r25b
           local-cache: true
 
-      - uses: tauri-apps/tauri-action@v0
-        env:
-          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          releaseId: "qing-otp"
-          args: "--target aarch64-linux-android"
+      - run: |
+            pnpm tauri android build --target aarch64
+            ls -l ./src-tauri/gen/android/app/build/outputs
       - uses: actions/upload-artifact@v4
         with:
           name: "qing-otp"
