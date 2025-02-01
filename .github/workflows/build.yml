@@ -46,12 +46,6 @@ jobs:
           node-version: "20.17.0"
           cache: "pnpm"
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: "x86_64-pc-windows-gnu,aarch64-linux-android"
-
-      - run: |
-          pnpm install
-          rustup toolchain add stable --profile minimal
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
@@ -60,14 +54,17 @@ jobs:
       - uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r25b
+          ndk-version: r28
           local-cache: true
 
-      - run: |
-          pnpm tauri android build --target aarch64
-          ls -l ./src-tauri/gen/android/app/build/outputs
+      - name: Build
         env:
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          pnpm install
+          pnpm tauri android build --target aarch64
+          ls -l ./src-tauri/gen/android/app/build/outputs
+
       - uses: actions/upload-artifact@v4
         with:
           name: "qing-otp"
