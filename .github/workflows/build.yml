@@ -3,7 +3,6 @@ on: [push]
 
 jobs:
   windows:
-    if: github.repository == 'thesixonenine/qing'
     strategy:
       matrix:
         platform: [windows-latest]
@@ -18,7 +17,6 @@ jobs:
         node-version: "20.17.0"
         cache: "pnpm"
     - uses: dtolnay/rust-toolchain@stable
-
     - name: install frontend dependencies
       run: pnpm install
 
