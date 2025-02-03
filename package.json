@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "repository": {
+    "url": "https://github.com/thesixonenine/qing-otp"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
