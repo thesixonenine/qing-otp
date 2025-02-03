@@ -53,13 +53,13 @@ jobs:
         if: matrix.platform == 'windows'
       - uses: tauri-apps/tauri-action@v0
         if: matrix.platform == 'windows'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          releaseId: "qing-otp-windows"
-          args: ""
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+#        with:
+#          releaseId: "qing-otp-windows"
+#          args: ""
       - uses: actions/upload-artifact@v4
         if: matrix.platform == 'windows'
         with:
-          name: build-${{ matrix.platform }}
+          name: qing-otp-${{ matrix.platform }}
           path: src-tauri/target/release/bundle
